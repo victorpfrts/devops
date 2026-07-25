@@ -1,0 +1,28 @@
+name: Auto Sync to Staging on PR Approval
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  sync-to-staging:
+    if: github.event.review.state == 'approved' && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Feature Branch to Staging
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin staging
+          git checkout staging
+          git merge origin/${{ github.event.pull_request.head.ref }} --no-ff -m "chore: sync PR #${{ github.event.pull_request.number }} (${{ github.event.pull_request.head.ref }}) to staging"
+          git push origin staging

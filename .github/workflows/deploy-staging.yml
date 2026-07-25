@@ -1,0 +1,19 @@
+name: Dummy Deploy (Staging)
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Simulate Staging Deploy
+        run: |
+          echo "🚀 Deploying to Staging Environment..."
+          echo "✅ Staging Deploy Completed Successfully!"
