@@ -39,4 +39,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr comment ${{ github.event.pull_request.number }} --body "⚠️ **Atenção:** Falha ao sincronizar com Staging devido a um **Conflito de Merge** com outras features que estão em testes no momento. Por favor, atualize a sua branch local com a \`main\` para resolver os conflitos e faça um novo push."
+          gh pr comment ${{ github.event.pull_request.number }} --body "⚠️ **Atenção:** Falha ao sincronizar com Staging devido a um **Conflito de Merge** com outra feature que está em testes no momento. 
+          
+          🛑 **NÃO faça merge da \`staging\` na sua branch!** Isso vai misturar o código de outras pessoas no seu PR.
+          
+          **Como resolver:** Como as duas features mexem no mesmo arquivo, você precisa aguardar a feature do colega ser aprovada pelo QA e ir para a \`main\`. Assim que ela estiver na \`main\`, você atualiza sua branch local com a \`main\`, resolve os conflitos e recebe um novo Approve para testar a sua."
