@@ -19,10 +19,24 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push Feature Branch to Staging
+        id: sync
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin staging
           git checkout staging
-          git merge origin/${{ github.event.pull_request.head.ref }} --no-ff -m "chore: sync PR #${{ github.event.pull_request.number }} (${{ github.event.pull_request.head.ref }}) to staging"
+          
+          # Tenta fazer o merge. Se falhar, seta uma flag e aborta para não quebrar a branch local
+          if ! git merge origin/${{ github.event.pull_request.head.ref }} --no-ff -m "chore: sync PR #${{ github.event.pull_request.number }} (${{ github.event.pull_request.head.ref }}) to staging"; then
+            echo "MERGE_FAILED=true" >> $GITHUB_ENV
+            git merge --abort
+            exit 1
+          fi
           git push origin staging
+
+      - name: Notify Developer on Conflict
+        if: failure() && env.MERGE_FAILED == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "⚠️ **Atenção:** Falha ao sincronizar com Staging devido a um **Conflito de Merge** com outras features que estão em testes no momento. Por favor, atualize a sua branch local com a \`main\` para resolver os conflitos e faça um novo push."
